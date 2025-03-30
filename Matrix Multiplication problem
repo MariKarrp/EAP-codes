@@ -1,0 +1,41 @@
+#include <iostream>
+#include <vector>
+#include <future>
+using namespace std;
+
+int multiply_element(const vector<vector<int>>& A, const vector<vector<int>>& B, int row, int col) {
+    int sum = 0;
+    for (int i = 0; i < A[0].size(); ++i) {
+        sum += A[row][i] * B[i][col];
+    }
+    return sum;
+}
+
+int main() {
+    int N = 4;
+
+    vector<vector<int>> A(N, vector<int>(N, 1));
+    vector<vector<int>> B(N, vector<int>(N, 2));
+    vector<vector<int>> C(N, vector<int>(N, 0));
+    vector<future<int>> futures;
+
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            futures.push_back(async(launch::async, multiply_element, cref(A), cref(B), i, j));
+        }
+    }
+    int idx = 0;
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            C[i][j] = futures[idx].get();
+            idx++;
+        }
+    }
+    cout << "Resulting Matrix C:" << endl;
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            cout << C[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
